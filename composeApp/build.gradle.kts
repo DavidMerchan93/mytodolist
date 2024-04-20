@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.realm.plugin)
 }
 
 kotlin {
@@ -39,6 +40,17 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+
+            implementation(libs.navigator)
+            implementation(libs.navigator.screen.model)
+            implementation(libs.navigator.transition)
+            implementation(libs.navigator.koin)
+            implementation(libs.koin.core)
+
+            implementation(libs.mongodb.realm)
+            implementation(libs.kotlin.coroutines.core)
+            implementation(libs.stately.common)
+
         }
     }
 }
