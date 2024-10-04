@@ -7,11 +7,14 @@ import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 class MongoDB {
-    var realm: Realm? = null
+    private var realm: Realm? = null
+
+    init {
+        configRealm()
+    }
 
     private fun configRealm() {
         if (realm == null || realm?.isClosed() == true) {
@@ -25,7 +28,7 @@ class MongoDB {
     }
 
     fun readCompleteTasks(): Flow<RequestState<List<ToDoTask>>> {
-        return realm?.query<ToDoTask>(query = "completed == $0", false)
+        return realm?.query<ToDoTask>(query = "isCompleted == $0", false)
             ?.asFlow()
             ?.map { result ->
                 RequestState.Success(
@@ -35,7 +38,7 @@ class MongoDB {
     }
 
     fun readActiveTasks(): Flow<RequestState<List<ToDoTask>>> {
-        return realm?.query<ToDoTask>(query = "completed == $0", false)
+        return realm?.query<ToDoTask>(query = "isCompleted == $0", false)
             ?.asFlow()
             ?.map { result ->
                 RequestState.Success(

@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import domain.RequestState
 import domain.ToDoTask
@@ -46,6 +47,9 @@ class HomeScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun HomeScreenContent(modifier: Modifier = Modifier) {
+        val homeViewModel = getScreenModel<HomeViewModel>()
+        val activeTasks by homeViewModel.activeTasks
+        val completeTasks by homeViewModel.completeTasks
 
         val navigator = LocalNavigator.current
 
@@ -76,16 +80,36 @@ class HomeScreen : Screen {
                     DisplayTasks(
                         modifier = Modifier.weight(1f),
                         showActive = true,
+                        tasks = activeTasks,
                         onComplete = { _, _ ->
 
                         },
+                        onSelect = {
+
+                        },
+                        onDelete = {
+
+                        },
+                        onFavorite = { _, _ ->
+
+                        }
                     )
                     DisplayTasks(
                         modifier = Modifier.weight(1f),
                         showActive = false,
+                        tasks = completeTasks,
                         onComplete = { _, _ ->
 
                         },
+                        onSelect = {
+
+                        },
+                        onDelete = {
+
+                        },
+                        onFavorite = { _, _ ->
+
+                        }
                     )
                 }
             }
@@ -97,10 +121,10 @@ class HomeScreen : Screen {
         modifier: Modifier = Modifier,
         tasks: RequestState<List<ToDoTask>>? = null,
         showActive: Boolean = true,
-        onSelect: ((ToDoTask) -> Unit)? = null,
-        onFavorite: ((ToDoTask, Boolean) -> Unit)? = null,
+        onSelect: (ToDoTask) -> Unit,
+        onFavorite: (ToDoTask, Boolean) -> Unit,
         onComplete: (ToDoTask, Boolean) -> Unit,
-        onDelete: ((ToDoTask) -> Unit)? = null
+        onDelete: (ToDoTask) -> Unit
     ) {
         var showDialog by remember { mutableStateOf(false) }
         var taskToDelete: ToDoTask? by remember { mutableStateOf(null) }
@@ -127,14 +151,14 @@ class HomeScreen : Screen {
             tasks?.DisplayResult(
                 onLoading = { LoadingScreen() },
                 onError = { ErrorScreen(message = it) },
-                onSuccess = {
-                    if (it.isNotEmpty()) {
+                onSuccess = { item ->
+                    if (item.isNotEmpty()) {
                         LazyColumn {
-                            items(items = it, key = { it._id }) { task ->
+                            items(items = item, key = { it._id.toHexString() }) { task ->
                                 TaskView(
                                     task = task,
                                     showActive = showActive,
-                                    onSelect = onSelect!!,
+                                    onSelect = onSelect,
                                     onComplete = onComplete,
                                     onFavorite = onFavorite!!,
                                     onDelete = {

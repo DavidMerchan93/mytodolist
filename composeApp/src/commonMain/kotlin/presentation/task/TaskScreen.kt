@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import presentation.components.HorizontalDivider
 
@@ -31,12 +32,25 @@ class TaskScreen : Screen {
 
     @Composable
     override fun Content() {
+        val taskViewModel = getScreenModel<TaskViewModel>()
         val navigator = LocalNavigator.current
+
+        when {
+            taskViewModel.saveTaskState.value.isLoading() -> {
+
+            }
+            taskViewModel.saveTaskState.value.isSuccess() -> {
+                navigator?.pop()
+            }
+            taskViewModel.saveTaskState.value.isError() -> {
+
+            }
+        }
 
         Scaffold {
             TaskScreenContent(
-                onSave = {
-
+                onSave = { title, message ->
+                    taskViewModel.saveTask(title, message)
                 },
                 onCancel = {
                     navigator?.pop()
@@ -49,9 +63,10 @@ class TaskScreen : Screen {
     @Composable
     fun TaskScreenContent(
         modifier: Modifier = Modifier,
-        onSave: () -> Unit = {},
-        onCancel: () -> Unit = {}
+        onSave: (String, String) -> Unit,
+        onCancel: () -> Unit
     ) {
+
         var title by remember { mutableStateOf("") }
         var message by remember { mutableStateOf("") }
 
@@ -96,7 +111,9 @@ class TaskScreen : Screen {
                     HorizontalDivider()
                     Button(
                         modifier = Modifier.fillMaxWidth().background(Color.Green),
-                        onClick = onSave
+                        onClick = {
+                            onSave(title, message)
+                        }
                     ) {
                         Text(text = "Save", color = Color.White)
                     }
