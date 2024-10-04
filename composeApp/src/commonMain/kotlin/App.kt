@@ -6,9 +6,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
+import data.MongoDB
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import presentation.home.HomeScreen
-
+import presentation.home.HomeViewModel
 
 val lightPrimaryColor = Color(0xAA8E00)
 val lightOnPrimaryColor = Color(0xFFFFFF)
@@ -61,9 +64,23 @@ fun App(
     } else {
         darkColors
     }
+
+    initKoin()
+
     MaterialTheme(colorScheme = colors) {
         Navigator(HomeScreen()) {
             SlideTransition(it)
         }
+    }
+}
+
+val databaseModule = module {
+    single { MongoDB() }
+    factory { HomeViewModel(get()) }
+}
+
+fun initKoin() {
+    startKoin {
+        modules(listOf(databaseModule))
     }
 }

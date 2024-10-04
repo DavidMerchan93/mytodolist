@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
@@ -29,30 +28,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
 import domain.RequestState
 import domain.ToDoTask
 import presentation.components.ErrorScreen
 import presentation.components.LoadingScreen
 import presentation.components.TaskView
+import presentation.task.TaskScreen
 
 class HomeScreen : Screen {
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
+        HomeScreenContent()
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun HomeScreenContent(modifier: Modifier = Modifier) {
+
+        val navigator = LocalNavigator.current
+
         Scaffold(
+            modifier = modifier,
             topBar = {
                 CenterAlignedTopAppBar(title = { Text(text = "Home") })
             },
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = {},
-                    shape = RoundedCornerShape(size = 12.dp)
+                    onClick = {
+                        navigator?.push(TaskScreen())
+                    },
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit"
-                    )
+                    Icon(Icons.Filled.Edit, "Floating action button.")
                 }
             },
             content = { paddingValues ->
@@ -65,7 +73,20 @@ class HomeScreen : Screen {
                             bottom = paddingValues.calculateBottomPadding()
                         )
                 ) {
+                    DisplayTasks(
+                        modifier = Modifier.weight(1f),
+                        showActive = true,
+                        onComplete = { _, _ ->
 
+                        },
+                    )
+                    DisplayTasks(
+                        modifier = Modifier.weight(1f),
+                        showActive = false,
+                        onComplete = { _, _ ->
+
+                        },
+                    )
                 }
             }
         )
@@ -74,7 +95,7 @@ class HomeScreen : Screen {
     @Composable
     fun DisplayTasks(
         modifier: Modifier = Modifier,
-        tasks: RequestState<List<ToDoTask>>,
+        tasks: RequestState<List<ToDoTask>>? = null,
         showActive: Boolean = true,
         onSelect: ((ToDoTask) -> Unit)? = null,
         onFavorite: ((ToDoTask, Boolean) -> Unit)? = null,
@@ -103,7 +124,7 @@ class HomeScreen : Screen {
                 fontWeight = FontWeight.Medium
             )
             Spacer(modifier = Modifier.height(12.dp))
-            tasks.DisplayResult(
+            tasks?.DisplayResult(
                 onLoading = { LoadingScreen() },
                 onError = { ErrorScreen(message = it) },
                 onSuccess = {
